@@ -43,6 +43,9 @@ public final class SNBTParser {
     private @Nullable StringBuilder buffer;
 
     private @Nullable Token lookahead;
+    /// the tokenizeNewLine flag of the corresponding lookahead value, used to check if a re-read is needed.
+    /// the nullability is same to the lookahead, which when lookahead is null, this is null.
+    private @Nullable Boolean lookaheadNewLineParam;
 
     public SNBTParser(CharSequence input, int beginIndex, int endIndex) {
         this(input, beginIndex, endIndex, false);
@@ -300,6 +303,7 @@ public final class SNBTParser {
         if (lookahead != null) {
             Token token = lookahead;
             lookahead = null;
+            lookaheadNewLineParam = null;
             return token;
         }
         return readNextToken();
@@ -326,8 +330,11 @@ public final class SNBTParser {
     }
 
     Token peekToken(boolean tokenizeNewLine) {
-        if (lookahead == null) {
+        // nullability of lookaheadNewLineParam is same to lookahead.
+        assert (lookahead == null) == (lookaheadNewLineParam == null);
+        if (lookahead == null || tokenizeNewLine != lookaheadNewLineParam) {
             lookahead = readNextToken(tokenizeNewLine);
+            lookaheadNewLineParam = tokenizeNewLine;
         }
         return lookahead;
     }
@@ -337,6 +344,7 @@ public final class SNBTParser {
             throw new AssertionError("Expected " + token + ", but got " + lookahead);
         }
         lookahead = null;
+        lookaheadNewLineParam = null;
     }
 
     public @Nullable Tag nextTag() throws IllegalArgumentException {

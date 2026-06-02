@@ -6,4 +6,8 @@
         3
         4
     ]
+    str_dict: {
+        a: foo
+        b: bar
+    }
 }

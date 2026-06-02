@@ -55,7 +55,9 @@ public final class SNBTCodecTest {
             var expected = new ListTag<>(TagType.INT);
             expected.setName("list");
             expected.addTags(new IntTag(1), new IntTag(2), new IntTag(3), new IntTag(4));
-            Assertions.assertEquals(expected, list);
+            assertEquals(expected, list);
+            var strDict = assertInstanceOf(CompoundTag.class, compound.get("str_dict"));
+            assertEquals(new CompoundTag().setString("a", "foo").setString("b", "bar"), strDict);
         }
     }
 
