@@ -337,12 +337,13 @@ public final class SNBTCodec {
                 && this.surroundingSpaces.equals(that.surroundingSpaces)
                 && this.escapeStrategy.equals(that.escapeStrategy)
                 && this.nameQuoteStrategy.equals(that.nameQuoteStrategy)
-                && this.valueQuoteStrategy.equals(that.valueQuoteStrategy);
+                && this.valueQuoteStrategy.equals(that.valueQuoteStrategy)
+                && this.allowNewLineAsSeparator == that.allowNewLineAsSeparator;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return Objects.hash(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     @Override
