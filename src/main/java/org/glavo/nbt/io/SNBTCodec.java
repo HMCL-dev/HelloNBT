@@ -83,8 +83,8 @@ public final class SNBTCodec {
             SurroundingSpaces.COMPACT,
             EscapeStrategy.defaultStrategy(),
             QuoteStrategy.defaultNameStrategy(),
-            QuoteStrategy.defaultValueStrategy()
-    );
+            QuoteStrategy.defaultValueStrategy(),
+            false);
 
     private static final SNBTCodec PRETTY = new SNBTCodec(
             LineBreakStrategy.defaultStrategy(),
@@ -92,8 +92,8 @@ public final class SNBTCodec {
             SurroundingSpaces.PRETTY,
             EscapeStrategy.defaultStrategy(),
             QuoteStrategy.defaultNameStrategy(),
-            QuoteStrategy.defaultValueStrategy()
-    );
+            QuoteStrategy.defaultValueStrategy(),
+            false);
 
     public static SNBTCodec of() {
         return PRETTY;
@@ -113,19 +113,7 @@ public final class SNBTCodec {
     private final boolean allowNewLineAsSeparator;
 
     private SNBTCodec(LineBreakStrategy lineBreakStrategy, String indentation, SurroundingSpaces surroundingSpaces,
-        EscapeStrategy escapeStrategy, QuoteStrategy nameQuoteStrategy, QuoteStrategy valueQuoteStrategy) {
-        this(
-            lineBreakStrategy,
-            indentation,
-            surroundingSpaces,
-            escapeStrategy,
-            nameQuoteStrategy,
-            valueQuoteStrategy,
-            false);
-    }
-
-    private SNBTCodec(LineBreakStrategy lineBreakStrategy, String indentation, SurroundingSpaces surroundingSpaces, EscapeStrategy escapeStrategy, QuoteStrategy nameQuoteStrategy, QuoteStrategy valueQuoteStrategy,
-        boolean allowNewLineAsSeparator) {
+                      EscapeStrategy escapeStrategy, QuoteStrategy nameQuoteStrategy, QuoteStrategy valueQuoteStrategy, boolean allowNewLineAsSeparator) {
         this.lineBreakStrategy = lineBreakStrategy;
         this.indentation = indentation;
         this.surroundingSpaces = surroundingSpaces;
@@ -151,7 +139,7 @@ public final class SNBTCodec {
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withLineBreakStrategy(LineBreakStrategy strategy) {
         Objects.requireNonNull(strategy, "strategy");
-        return new SNBTCodec(strategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(strategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     /// Returns the indentation string before each line.
@@ -175,7 +163,7 @@ public final class SNBTCodec {
             }
         }
 
-        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
 
     }
 
@@ -187,7 +175,7 @@ public final class SNBTCodec {
     /// @see #withIndentation(String)
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withIndentation(int spaces) {
-        return new SNBTCodec(lineBreakStrategy, " ".repeat(spaces), surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, " ".repeat(spaces), surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     /// Returns the surrounding spaces for SNBT.
@@ -200,7 +188,7 @@ public final class SNBTCodec {
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withSurroundingSpaces(SurroundingSpaces surroundingSpaces) {
         Objects.requireNonNull(surroundingSpaces, "surroundingSpaces");
-        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     /// Returns the escape strategy for SNBT.
@@ -219,7 +207,7 @@ public final class SNBTCodec {
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withEscapeStrategy(EscapeStrategy escapeStrategy) {
         Objects.requireNonNull(escapeStrategy, "escapeStrategy");
-        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     /// Returns the quote strategy for SNBT tag names.
@@ -238,7 +226,7 @@ public final class SNBTCodec {
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withNameQuoteStrategy(QuoteStrategy quoteStrategy) {
         Objects.requireNonNull(quoteStrategy, "quoteStrategy");
-        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, quoteStrategy, valueQuoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, quoteStrategy, valueQuoteStrategy, allowNewLineAsSeparator);
     }
 
     /// Returns the quote strategy for SNBT tag values.
@@ -257,7 +245,7 @@ public final class SNBTCodec {
     @Contract(value = "_ -> new", pure = true)
     public SNBTCodec withValueQuoteStrategy(QuoteStrategy quoteStrategy) {
         Objects.requireNonNull(quoteStrategy, "quoteStrategy");
-        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, quoteStrategy);
+        return new SNBTCodec(lineBreakStrategy, indentation, surroundingSpaces, escapeStrategy, nameQuoteStrategy, quoteStrategy, allowNewLineAsSeparator);
     }
 
     @Contract(pure = true)
