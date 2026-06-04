@@ -64,7 +64,10 @@ public final class SNBTCodecTest {
                     .setName("str_dict")
                     .setString("a", "foo")
                     .setString("b", "bar")
-                    .setString("c", "baz"), strDict);
+                    .setString("c", "baz")
+                    .setString("d", "Hello\nWorld")
+                    .setIntArray("e", new int[] {-886784530, 1488270925, -1459824571, -372109282})
+                    .setBoolean("f", true), strDict);
         }
     }
 

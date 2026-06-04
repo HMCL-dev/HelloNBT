@@ -10,5 +10,9 @@
         a: foo
         b: bar
         c: baz
+        d: "Hello
+World"
+        e: uuid(cb24bdee-58b5-364d-a8fc-d845e9d2101e)
+        f: bool(1)
     }
 }
