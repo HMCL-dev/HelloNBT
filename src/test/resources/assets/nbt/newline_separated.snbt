@@ -9,5 +9,6 @@
     str_dict: {
         a: foo
         b: bar
+        c: baz
     }
 }

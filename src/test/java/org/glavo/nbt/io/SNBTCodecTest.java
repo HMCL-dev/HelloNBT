@@ -49,15 +49,22 @@ public final class SNBTCodecTest {
             var tag = SNBTCodec.of().withAllowNewLineAsSeparator(true).readTag(reader);
             var compound = assertInstanceOf(CompoundTag.class, tag);
             assertEquals("Foo", compound.getString("name"));
+            // check list
             var list = assertInstanceOf(ListTag.class, compound.get("list"));
             assert list != null : "ensured by assertInstanceOf";
             assertEquals(TagType.INT, list.getElementType());
-            var expected = new ListTag<>(TagType.INT);
-            expected.setName("list");
-            expected.addTags(new IntTag(1), new IntTag(2), new IntTag(3), new IntTag(4));
-            assertEquals(expected, list);
+            assertEquals(new ListTag<>(TagType.INT).setName("list")
+                    .addTag(new IntTag(1))
+                    .addTag(new IntTag(2))
+                    .addTag(new IntTag(3))
+                    .addTag(new IntTag(4)), list);
+            // check compound
             var strDict = assertInstanceOf(CompoundTag.class, compound.get("str_dict"));
-            assertEquals(new CompoundTag().setString("a", "foo").setString("b", "bar"), strDict);
+            assertEquals(new CompoundTag()
+                    .setName("str_dict")
+                    .setString("a", "foo")
+                    .setString("b", "bar")
+                    .setString("c", "baz"), strDict);
         }
     }
 

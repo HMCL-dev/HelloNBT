@@ -46,6 +46,9 @@ public final class SNBTParser {
     /// the tokenizeNewLine flag of the corresponding lookahead value, used to check if a re-read is needed.
     /// the nullability is same to the lookahead, which when lookahead is null, this is null.
     private @Nullable Boolean lookaheadNewLineParam;
+    /// the cursor to roll back to when the lookahead need to be re-read.
+    /// the nullability is same to the lookahead, which when lookahead is null, this is null.
+    private @Nullable Integer lookaheadCursor;
 
     public SNBTParser(CharSequence input, int beginIndex, int endIndex) {
         this(input, beginIndex, endIndex, false);
@@ -304,6 +307,7 @@ public final class SNBTParser {
             Token token = lookahead;
             lookahead = null;
             lookaheadNewLineParam = null;
+            lookaheadCursor = null;
             return token;
         }
         return readNextToken();
@@ -331,8 +335,17 @@ public final class SNBTParser {
 
     Token peekToken(boolean tokenizeNewLine) {
         // nullability of lookaheadNewLineParam is same to lookahead.
-        assert (lookahead == null) == (lookaheadNewLineParam == null);
-        if (lookahead == null || tokenizeNewLine != lookaheadNewLineParam) {
+        assert (lookahead != null) == (lookaheadNewLineParam != null);
+        assert (lookahead != null) == (lookaheadCursor != null);
+
+        if(lookahead == null) {
+            // preserved the rollback point
+            lookaheadCursor = cursor;
+            lookahead = readNextToken(tokenizeNewLine);
+            lookaheadNewLineParam = tokenizeNewLine;
+        } else if(lookaheadNewLineParam != tokenizeNewLine) {
+            // the flag doesn't match, do the rollback
+            cursor = lookaheadCursor;
             lookahead = readNextToken(tokenizeNewLine);
             lookaheadNewLineParam = tokenizeNewLine;
         }
@@ -345,6 +358,7 @@ public final class SNBTParser {
         }
         lookahead = null;
         lookaheadNewLineParam = null;
+        lookaheadCursor = null;
     }
 
     public @Nullable Tag nextTag() throws IllegalArgumentException {
