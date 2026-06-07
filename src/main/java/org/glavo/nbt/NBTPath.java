@@ -42,9 +42,10 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     ///
     /// @param expectedRoot the expected root instead of the top of the tree.
     /// @return the path or `null` if parent is null.
+    /// @throws IllegalStateException when the expected root doesn't match the actual root.
     @SuppressWarnings({"DataFlowIssue", "unchecked"})
     @Contract(pure = true)
-    static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) {
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
         ParentTag<?> parentTag = tag.getParentTag();
         if (parentTag == null) return null;
 
