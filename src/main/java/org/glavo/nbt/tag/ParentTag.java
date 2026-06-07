@@ -95,7 +95,8 @@ public sealed abstract class ParentTag<T extends Tag> extends Tag
 
         int arrayEnd = Math.min(size, tags.length);
         if (index < arrayEnd - 1) {
-            System.arraycopy(tags, index + 1, tags, index, size - index);
+            System.arraycopy(tags, index + 1, tags, index, size - index - 1);
+            tags[arrayEnd - 1] = null;
         } else if (oldTag != null) {
             tags[index] = null;
         }
@@ -179,7 +180,7 @@ public sealed abstract class ParentTag<T extends Tag> extends Tag
     /// If the `tag` is already a child of another tag, removes it from old parent and adds it to this tag.
     @Contract(value = "_ -> this", mutates = "this,param1")
     public abstract ParentTag<T> addTag(@Flow(targetIsContainer = true)
-                                T tag) throws IllegalArgumentException;
+                                        T tag) throws IllegalArgumentException;
 
     /// Adds all `tags` to this tag.
     ///

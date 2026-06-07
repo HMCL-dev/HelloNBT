@@ -15,6 +15,7 @@
  */
 package org.glavo.nbt.tag;
 
+import org.glavo.nbt.internal.ArrayAccessor;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Supplier;
@@ -237,5 +238,50 @@ final class ListTagTest {
         assertEquals("hello", assertInstanceOf(StringTag.class, tag.getTag(0)).get());
         assertEquals("changed", cloneFirst.get());
         assertContentNotEquals(tag, clone);
+    }
+
+    @Test
+    void testRemoveAt() {
+        ListTag<IntTag> list = new ListTag<>();
+        for (int i = 0; i < 9; i++) {
+            list.addTag(new IntTag(i));
+        }
+        assertEquals(new IntTag(6), list.removeTagAt(6));
+        assertEquals(8, list.size());
+        assertArrayEquals(new IntTag[]{
+                new IntTag(0), new IntTag(1), new IntTag(2),
+                new IntTag(3), new IntTag(4), new IntTag(5),
+                new IntTag(7), new IntTag(8), null,
+                null, null, null}, list.tags);
+    }
+
+    @Test
+    void testRemoveAtCapacity() {
+        ListTag<IntTag> list = new ListTag<>();
+        for (int i = 0; i < ArrayAccessor.DEFAULT_CAPACITY; i++) {
+            list.addTag(new IntTag(i));
+        }
+        assertEquals(new IntTag(6), list.removeTagAt(6));
+        assertEquals(ArrayAccessor.DEFAULT_CAPACITY - 1, list.size());
+        assertArrayEquals(new IntTag[]{
+                new IntTag(0), new IntTag(1), new IntTag(2),
+                new IntTag(3), new IntTag(4), new IntTag(5),
+                new IntTag(7), new IntTag(8), new IntTag(9),
+                new IntTag(10), new IntTag(11), null}, list.tags);
+    }
+
+    @Test
+    void testRemoveAtEnd() {
+        ListTag<IntTag> list = new ListTag<>();
+        for (int i = 0; i < ArrayAccessor.DEFAULT_CAPACITY; i++) {
+            list.addTag(new IntTag(i));
+        }
+        assertEquals(new IntTag(11), list.removeTagAt(11));
+        assertEquals(ArrayAccessor.DEFAULT_CAPACITY - 1, list.size());
+        assertArrayEquals(new IntTag[]{
+                new IntTag(0), new IntTag(1), new IntTag(2),
+                new IntTag(3), new IntTag(4), new IntTag(5),
+                new IntTag(6), new IntTag(7), new IntTag(8),
+                new IntTag(9), new IntTag(10), null}, list.tags);
     }
 }
