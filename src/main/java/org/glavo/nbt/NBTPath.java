@@ -17,10 +17,14 @@ package org.glavo.nbt;
 
 import org.glavo.nbt.internal.path.NBTPathImpl;
 import org.glavo.nbt.internal.snbt.SNBTParser;
+import org.glavo.nbt.tag.CompoundTag;
+import org.glavo.nbt.tag.ParentTag;
 import org.glavo.nbt.tag.Tag;
 import org.glavo.nbt.tag.TagType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
 
 /// An NBT path is a descriptive string used to specify one or more particular elements from an NBT data tree.
 ///
@@ -32,6 +36,42 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     @Contract(pure = true)
     static NBTPath<?> of(String path) throws IllegalArgumentException {
         return new SNBTParser(path, 0, path.length()).nextPath();
+    }
+
+    /// Get the path from the root to the given tag.
+    ///
+    /// @param expectedRoot the expected root instead of the top of the tree.
+    /// @return the path or `null` if parent is null.
+    @SuppressWarnings({"DataFlowIssue", "unchecked"})
+    @Contract(pure = true)
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) {
+        ParentTag<?> parentTag = tag.getParentTag();
+        if (parentTag == null) return null;
+
+        List<String> paths = new ArrayList<>();
+        paths.add(getIndicator(tag));
+        while (true) {
+            if (parentTag == expectedRoot) break;
+            paths.add(getIndicator(parentTag));
+            ParentTag<?> parent = parentTag.getParentTag();
+            if (parent == null) break;
+            parentTag = parent;
+        }
+
+        if (parentTag != expectedRoot)
+            throw new IllegalStateException("Unexpected root tag " + parentTag + ", expected " + expectedRoot + ".");
+        Collections.reverse(paths);
+        String pathString = String.join(".", paths);
+        return (NBTPath<T>) of(pathString).withTagType(tag.getType());
+    }
+
+    /// Get the indicator of the given tag, depends on its parent tag.
+    ///
+    /// @return the name if parent is [CompoundTag], the index if parent is other [ParentTag], or `null` if parent is null.
+    @Contract(pure = true)
+    static @Nullable String getIndicator(Tag tag) {
+        ParentTag<?> parentTag = tag.getParentTag();
+        return parentTag == null ? null : parentTag instanceof CompoundTag ? tag.getName() : ('[' + String.valueOf(tag.getIndex()) + ']');
     }
 
     /// Returns the tag type of this path.
