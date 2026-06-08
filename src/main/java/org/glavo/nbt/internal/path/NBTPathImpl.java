@@ -22,6 +22,7 @@ import org.glavo.nbt.chunk.ChunkRegion;
 import org.glavo.nbt.internal.snbt.SNBTWriter;
 import org.glavo.nbt.io.SNBTCodec;
 import org.glavo.nbt.tag.CompoundTag;
+import org.glavo.nbt.tag.ParentTag;
 import org.glavo.nbt.tag.Tag;
 import org.glavo.nbt.tag.TagType;
 import org.jetbrains.annotations.Nullable;
@@ -57,6 +58,14 @@ public final class NBTPathImpl<T extends Tag> implements NBTPath<T> {
         }
 
         return (Stream<T>) tags;
+    }
+
+    /// Get the indicator of the given tag, depends on its parent tag.
+    ///
+    /// @return the name node if parent is [CompoundTag], the index node if parent is other [ParentTag], or `null` if parent is null.
+    public static @Nullable NBTPathNode getIndicator(Tag tag) {
+        ParentTag<?> parentTag = tag.getParentTag();
+        return parentTag == null ? null : parentTag instanceof CompoundTag ? new NBTPathNode.NamedSubTag(tag.getName()) : new NBTPathNode.Index(tag.getIndex());
     }
 
     private final NBTPathNode @Unmodifiable [] nodes;

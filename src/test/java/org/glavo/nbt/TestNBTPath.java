@@ -59,4 +59,19 @@ final class TestNBTPath {
         assertEquals(2, expectedRoot.getFirstInt(pathTo2));
         assertEquals(NBTPath.of("bar.baz[2]").withTagType(TagType.INT), pathTo2);
     }
+
+    @Test
+    void testOfPath3() {
+        CompoundTag root = new CompoundTag().setName("root");
+        StringTag tag;
+
+        root.addTag("Very Cool Name", new CompoundTag()
+                .addTag("bar", new CompoundTag()
+                        .addTag("baz", tag = new StringTag(":D"))));
+
+        NBTPath<StringTag> pathToSmile = NBTPath.of(tag, root);
+        assertNotNull(pathToSmile);
+        assertEquals(":D", root.getFirstString(pathToSmile));
+        assertEquals(NBTPath.of("\"Very Cool Name\".bar.baz").withTagType(TagType.STRING), pathToSmile);
+    }
 }
