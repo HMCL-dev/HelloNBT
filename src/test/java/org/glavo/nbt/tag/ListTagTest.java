@@ -238,4 +238,24 @@ final class ListTagTest {
         assertEquals("changed", cloneFirst.get());
         assertContentNotEquals(tag, clone);
     }
+
+    @Test
+    void testParentTagIteratorRemove() {
+        var tag = new ListTag<IntTag>();
+        for (int i = 0; i < 9; i++) {
+            tag.addTag(new IntTag(i));
+        }
+        var iter = tag.iterator();
+        while (iter.hasNext()) {
+            IntTag t = iter.next();
+            if (t.get() % 2 == 0) {
+                iter.remove();
+            }
+        }
+        assertContentEquals(new ListTag<>()
+                .addTag(new IntTag(1))
+                .addTag(new IntTag(3))
+                .addTag(new IntTag(5))
+                .addTag(new IntTag(7)), tag);
+    }
 }
