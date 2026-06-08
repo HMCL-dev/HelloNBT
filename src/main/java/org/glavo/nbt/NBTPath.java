@@ -91,4 +91,16 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     @Contract(pure = true)
     <T2 extends Tag> NBTPath<T2> withTagType(TagType<T2> tagType) throws IllegalStateException;
 
+    /// Returns the path string.
+    ///
+    /// @param omitDots `true` to omit dots if possible.
+    @Contract(pure = true)
+    String toPathString(boolean omitDots);
+
+    /// Returns the path string with dots omitted if possible.
+    @Contract(pure = true)
+    default String toPathString() {
+        return toPathString(true);
+    }
+
 }

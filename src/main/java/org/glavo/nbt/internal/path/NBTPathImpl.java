@@ -107,33 +107,31 @@ public final class NBTPathImpl<T extends Tag> implements NBTPath<T> {
     }
 
     @Override
+    public String toPathString(boolean omitDots) {
+        StringBuilder builder = new StringBuilder();
+
+        SNBTWriter<StringBuilder> writer = new SNBTWriter<>(SNBTCodec.ofCompact(), builder);
+        for (int i = 0; i < nodes.length; i++) {
+            NBTPathNode node = nodes[i];
+            try {
+                node.appendTo(writer);
+            } catch (IOException e) {
+                throw new AssertionError(e);
+            }
+            if (i + 1 < nodes.length && (!omitDots || nodes[i + 1].needDot())) {
+                writer.getAppendable().append('.');
+            }
+        }
+
+        return builder.toString();
+    }
+
+    @Override
     public String toString() {
         if (cachedString == null) {
-            StringBuilder builder = new StringBuilder();
-
-            if (tagType != null) {
-                builder.append("<").append(tagType).append("> ");
-            }
-
-            var writer = new SNBTWriter<>(SNBTCodec.ofCompact(), builder);
-
-            boolean first = true;
-            for (NBTPathNode node : nodes) {
-                if (first) {
-                    first = false;
-                } else if (node.needDot()) {
-                    writer.getAppendable().append('.');
-                }
-
-                try {
-                    node.appendTo(writer);
-                } catch (IOException e) {
-                    throw new AssertionError(e);
-                }
-            }
-
-            builder.append(']');
-            cachedString = builder.toString();
+            String pathString = toPathString();
+            if (tagType != null) pathString = "<" + tagType + ">" + " " + pathString;
+            cachedString = pathString;
         }
 
         return cachedString;

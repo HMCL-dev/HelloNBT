@@ -188,4 +188,40 @@ final class NBTPathTest {
         assertThrows(IllegalArgumentException.class, () -> NBTPath.of("\"unterminated"));
         assertThrows(IllegalArgumentException.class, () -> NBTPath.of("[2147483648]"));
     }
+
+    @Test
+    void testPathString() {
+        assertEquals("{}", NBTPath.of("{}").toPathString());
+        assertEquals("{Invisible:1B}", NBTPath.of("{Invisible:1b}").toPathString());
+        assertEquals("\"A Very Cool Name[]\"", NBTPath.of("\"A Very Cool Name[]\"").toPathString());
+        assertEquals("\"A Very Cool Name[]\"{}", NBTPath.of("\"A Very Cool Name[]\"{}").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[]", NBTPath.of("\"A Very Cool Name[]\"[]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[{}]", NBTPath.of("\"A Very Cool Name[]\"[{}]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[{Count:25B}]", NBTPath.of("\"A Very Cool Name[]\"[{Count:25b}]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[][][]", NBTPath.of("\"A Very Cool Name[]\"[][][]").toPathString());
+        assertEquals("foo.bar", NBTPath.of("foo.bar").toPathString());
+        assertEquals("foo.bar[]", NBTPath.of("foo.bar.[]").toPathString());
+        assertEquals("foo.bar[{}]", NBTPath.of("foo.bar.[{}]").toPathString());
+        assertEquals("foo.bar[0]", NBTPath.of("foo.bar.[0]").toPathString());
+        assertEquals("foo.bar[-1]", NBTPath.of("foo.bar.[-1]").toPathString());
+        assertEquals("foo.bar.\"0123\"", NBTPath.of("foo.bar.\"0123\"").toPathString());
+    }
+
+    @Test
+    void testPathStringKeepDots() {
+        assertEquals("{}", NBTPath.of("{}").toPathString(false));
+        assertEquals("{Invisible:1B}", NBTPath.of("{Invisible:1b}").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\"", NBTPath.of("\"A Very Cool Name[]\"").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\"{}", NBTPath.of("\"A Very Cool Name[]\"{}").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[]", NBTPath.of("\"A Very Cool Name[]\"[]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[{}]", NBTPath.of("\"A Very Cool Name[]\"[{}]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[{Count:25B}]", NBTPath.of("\"A Very Cool Name[]\"[{Count:25b}]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[].[].[]", NBTPath.of("\"A Very Cool Name[]\"[][][]").toPathString(false));
+        assertEquals("foo.bar", NBTPath.of("foo.bar").toPathString(false));
+        assertEquals("foo.bar.[]", NBTPath.of("foo.bar.[]").toPathString(false));
+        assertEquals("foo.bar.[{}]", NBTPath.of("foo.bar.[{}]").toPathString(false));
+        assertEquals("foo.bar.[0]", NBTPath.of("foo.bar.[0]").toPathString(false));
+        assertEquals("foo.bar.[-1]", NBTPath.of("foo.bar.[-1]").toPathString(false));
+        assertEquals("foo.bar.\"0123\"", NBTPath.of("foo.bar.\"0123\"").toPathString(false));
+    }
 }
