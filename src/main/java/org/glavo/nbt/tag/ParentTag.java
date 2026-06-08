@@ -269,6 +269,7 @@ public sealed abstract class ParentTag<T extends Tag> extends Tag
 
         return new Iterator<>() {
             private int cursor = 0;
+            private int lastRef = -1;
 
             @Override
             public boolean hasNext() {
@@ -280,7 +281,15 @@ public sealed abstract class ParentTag<T extends Tag> extends Tag
                 if (cursor >= size) {
                     throw new NoSuchElementException();
                 }
-                return getTag(cursor++);
+                return getTag(lastRef = cursor++);
+            }
+
+            @Override
+            public void remove() {
+                if(lastRef < 0) throw new IllegalStateException();
+                removeTagAt(lastRef);
+                cursor = lastRef;
+                lastRef = -1;
             }
         };
     }
