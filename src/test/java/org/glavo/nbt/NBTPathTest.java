@@ -21,12 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 final class NBTPathTest {
 
@@ -223,5 +219,58 @@ final class NBTPathTest {
         assertEquals("foo.bar.[0]", NBTPath.of("foo.bar.[0]").toPathString(false));
         assertEquals("foo.bar.[-1]", NBTPath.of("foo.bar.[-1]").toPathString(false));
         assertEquals("foo.bar.\"0123\"", NBTPath.of("foo.bar.\"0123\"").toPathString(false));
+    }
+
+    @Test
+    void testOfPath() {
+        CompoundTag root = new CompoundTag().setName("root");
+        IntTag tag;
+
+        root.addTag("foo", new CompoundTag()
+                .addTag("bar", new ListTag<IntTag>()
+                        .addTag(new IntTag(0))
+                        .addTag(new IntTag(1))
+                        .addTag(tag = new IntTag(2))
+                ));
+
+        NBTPath<IntTag> pathTo2 = NBTPath.of(tag, root);
+        assertNotNull(pathTo2);
+        assertEquals(2, root.getFirstInt(pathTo2));
+        assertEquals(NBTPath.of("foo.bar[2]").withTagType(TagType.INT), pathTo2);
+    }
+
+    @Test
+    void testOfPath2() {
+        CompoundTag root = new CompoundTag().setName("root");
+        CompoundTag expectedRoot;
+        IntTag tag;
+
+        root.addTag("foo", expectedRoot = new CompoundTag()
+                .addTag("bar", new CompoundTag()
+                        .addTag("baz", new ListTag<IntTag>()
+                                .addTag(new IntTag(0))
+                                .addTag(new IntTag(1))
+                                .addTag(tag = new IntTag(2))
+                        )));
+
+        NBTPath<IntTag> pathTo2 = NBTPath.of(tag, expectedRoot);
+        assertNotNull(pathTo2);
+        assertEquals(2, expectedRoot.getFirstInt(pathTo2));
+        assertEquals(NBTPath.of("bar.baz[2]").withTagType(TagType.INT), pathTo2);
+    }
+
+    @Test
+    void testOfPath3() {
+        CompoundTag root = new CompoundTag().setName("root");
+        StringTag tag;
+
+        root.addTag("Very Cool Name", new CompoundTag()
+                .addTag("bar", new CompoundTag()
+                        .addTag("baz", tag = new StringTag(":D"))));
+
+        NBTPath<StringTag> pathToSmile = NBTPath.of(tag, root);
+        assertNotNull(pathToSmile);
+        assertEquals(":D", root.getFirstString(pathToSmile));
+        assertEquals(NBTPath.of("\"Very Cool Name\".bar.baz").withTagType(TagType.STRING), pathToSmile);
     }
 }
