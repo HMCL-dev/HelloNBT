@@ -38,7 +38,7 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
         return new SNBTParser(path, 0, path.length()).nextPath();
     }
 
-    /// Get the path from the root to the given tag.
+    /// Get the path from the root tag to the given tag.
     ///
     /// @param expectedRoot the expected root instead of the top of the tree.
     /// @return the path or `null` if parent is null.
