@@ -95,7 +95,7 @@ public sealed abstract class ParentTag<T extends Tag> extends Tag
 
         int arrayEnd = Math.min(size, tags.length);
         if (index < arrayEnd - 1) {
-            System.arraycopy(tags, index + 1, tags, index, size - index - 1);
+            System.arraycopy(tags, index + 1, tags, index, arrayEnd - index - 1);
             tags[arrayEnd - 1] = null;
         } else if (oldTag != null) {
             tags[index] = null;
