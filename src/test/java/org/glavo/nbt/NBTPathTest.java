@@ -15,6 +15,8 @@
  */
 package org.glavo.nbt;
 
+import org.glavo.nbt.chunk.Chunk;
+import org.glavo.nbt.chunk.ChunkRegion;
 import org.glavo.nbt.io.NBTCodec;
 import org.glavo.nbt.tag.*;
 import org.junit.jupiter.api.Test;
@@ -273,5 +275,21 @@ final class NBTPathTest {
         assertEquals(":D", root.getFirstString(pathToSmile));
         assertEquals(pathToSmile, pathToRoot);
         assertEquals(NBTPath.of("\"Very Cool Name\".bar.baz").withTagType(TagType.STRING), pathToSmile);
+    }
+
+    @Test
+    void testOfPath4() {
+        ChunkRegion chunkRegion = new ChunkRegion();
+        Chunk chunk = chunkRegion.getChunk(0, 0);
+        CompoundTag rootTag;
+        chunk.setRootTag(rootTag = new CompoundTag());
+        StringTag testTag;
+        rootTag.addTag("test", testTag = new StringTag("TEST"));
+
+        NBTPath<StringTag> pathToTest = NBTPath.of(testTag, null);
+        assertNotNull(pathToTest);
+        assertEquals("test", pathToTest.toPathString());
+        assertEquals("TEST", chunkRegion.getFirstString(pathToTest));
+        assertEquals("TEST", chunk.getFirstString(pathToTest));
     }
 }

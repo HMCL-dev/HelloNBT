@@ -18,7 +18,6 @@ package org.glavo.nbt;
 import org.glavo.nbt.internal.path.NBTPathImpl;
 import org.glavo.nbt.internal.path.NBTPathNode;
 import org.glavo.nbt.internal.snbt.SNBTParser;
-import org.glavo.nbt.tag.ParentTag;
 import org.glavo.nbt.tag.Tag;
 import org.glavo.nbt.tag.TagType;
 import org.jetbrains.annotations.Contract;
@@ -46,7 +45,7 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     @SuppressWarnings({"DataFlowIssue", "unchecked"})
     @Contract(pure = true)
     static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
-        ParentTag<?> parentTag = tag.getParentTag();
+        NBTParent<?> parentTag = tag.getParent();
         if (parentTag == null) return null;
 
         List<NBTPathNode> paths = new ArrayList<>();
@@ -55,7 +54,7 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
             NBTPathNode parentIndicator = NBTPathImpl.getIndicator(parentTag);
             if (parentTag == expectedRoot || parentIndicator == null) break;
             paths.add(parentIndicator);
-            ParentTag<?> parent = parentTag.getParentTag();
+            NBTParent<?> parent = parentTag.getParent();
             if (parent == null) break;
             parentTag = parent;
         }

@@ -15,6 +15,7 @@
  */
 package org.glavo.nbt.internal.path;
 
+import org.glavo.nbt.NBTElement;
 import org.glavo.nbt.NBTParent;
 import org.glavo.nbt.NBTPath;
 import org.glavo.nbt.chunk.Chunk;
@@ -63,9 +64,14 @@ public final class NBTPathImpl<T extends Tag> implements NBTPath<T> {
     /// Get the indicator of the given tag, depends on its parent tag.
     ///
     /// @return the name node if parent is [CompoundTag], the index node if parent is other [ParentTag], or `null` if parent is null.
-    public static @Nullable NBTPathNode getIndicator(Tag tag) {
-        ParentTag<?> parentTag = tag.getParentTag();
-        return parentTag == null ? null : parentTag instanceof CompoundTag ? new NBTPathNode.NamedSubTag(tag.getName()) : new NBTPathNode.Index(tag.getIndex());
+    public static @Nullable NBTPathNode getIndicator(NBTElement tag) {
+        if (!(tag instanceof Tag currentTag)) return null;
+        NBTParent<?> parentTag = tag.getParent();
+        if (parentTag instanceof ParentTag<?>) {
+            return parentTag instanceof CompoundTag ? new NBTPathNode.NamedSubTag(currentTag.getName()) : new NBTPathNode.Index(currentTag.getIndex());
+        } else { // Chunk, ChunkRegion or null
+            return null;
+        }
     }
 
     private final NBTPathNode @Unmodifiable [] nodes;
