@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 final class NBTPathTest {
 
@@ -269,8 +268,10 @@ final class NBTPathTest {
                         .addTag("baz", tag = new StringTag(":D"))));
 
         NBTPath<StringTag> pathToSmile = NBTPath.of(tag, root);
+        NBTPath<StringTag> pathToRoot = NBTPath.of(tag, null);
         assertNotNull(pathToSmile);
         assertEquals(":D", root.getFirstString(pathToSmile));
+        assertEquals(pathToSmile, pathToRoot);
         assertEquals(NBTPath.of("\"Very Cool Name\".bar.baz").withTagType(TagType.STRING), pathToSmile);
     }
 }
