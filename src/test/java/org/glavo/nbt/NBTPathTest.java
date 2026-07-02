@@ -270,7 +270,7 @@ final class NBTPathTest {
                         .addTag("baz", tag = new StringTag(":D"))));
 
         NBTPath<StringTag> pathToSmile = NBTPath.of(tag, root);
-        NBTPath<StringTag> pathToRoot = NBTPath.of(tag, null);
+        NBTPath<StringTag> pathToRoot = NBTPath.of(tag);
         assertNotNull(pathToSmile);
         assertEquals(":D", root.getFirstString(pathToSmile));
         assertEquals(pathToSmile, pathToRoot);
@@ -286,10 +286,23 @@ final class NBTPathTest {
         StringTag testTag;
         rootTag.addTag("test", testTag = new StringTag("TEST"));
 
-        NBTPath<StringTag> pathToTest = NBTPath.of(testTag, null);
+        NBTPath<StringTag> pathToTest = NBTPath.of(testTag);
         assertNotNull(pathToTest);
         assertEquals("test", pathToTest.toPathString());
         assertEquals("TEST", chunkRegion.getFirstString(pathToTest));
         assertEquals("TEST", chunk.getFirstString(pathToTest));
+    }
+
+    @Test
+    void testOfPath5() {
+        CompoundTag rootTag;
+        Chunk chunk = new Chunk(rootTag = new CompoundTag());
+        StringTag testTag;
+        rootTag.addTag("test", testTag = new StringTag("TEST"));
+
+        NBTPath<StringTag> path = NBTPath.of(testTag);
+        assertNotNull(path);
+        assertEquals("TEST", chunk.getFirstString(path));
+        assertEquals("test", path.toPathString());
     }
 }

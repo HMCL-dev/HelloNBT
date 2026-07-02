@@ -30,8 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Stream;
 
 public final class NBTPathImpl<T extends Tag> implements NBTPath<T> {
@@ -61,10 +60,32 @@ public final class NBTPathImpl<T extends Tag> implements NBTPath<T> {
         return (Stream<T>) tags;
     }
 
+    @SuppressWarnings("unchecked")
+    public static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
+        List<NBTPathNode> paths = new ArrayList<>();
+
+        NBTPathNode indicator = NBTPathImpl.getIndicator(tag);
+        NBTParent<?> next = tag.getParent();
+        while (next != null && indicator != null) {
+            paths.add(indicator);
+            indicator = NBTPathImpl.getIndicator(next);
+            if (next == expectedRoot) break;
+            else next = next.getParent();
+        }
+
+        if (expectedRoot != null && expectedRoot != next) {
+            throw new IllegalStateException("Unexpected root tag " + expectedRoot + ", expected " + next + ".");
+        } else if (paths.isEmpty()) {
+            return null;
+        }
+        Collections.reverse(paths);
+        return new NBTPathImpl<>(paths.toArray(NBTPathNode[]::new), (TagType<T>) tag.getType());
+    }
+
     /// Get the indicator of the given tag, depends on its parent tag.
     ///
     /// @return the name node if parent is [CompoundTag], the index node if parent is other [ParentTag], or `null` if parent is null.
-    public static @Nullable NBTPathNode getIndicator(NBTElement tag) {
+    public static @Nullable NBTPathNode getIndicator(@Nullable NBTElement tag) {
         if (!(tag instanceof Tag currentTag)) return null;
         NBTParent<?> parentTag = tag.getParent();
         if (parentTag instanceof ParentTag<?>) {

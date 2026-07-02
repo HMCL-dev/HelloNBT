@@ -16,7 +16,6 @@
 package org.glavo.nbt;
 
 import org.glavo.nbt.internal.path.NBTPathImpl;
-import org.glavo.nbt.internal.path.NBTPathNode;
 import org.glavo.nbt.internal.snbt.SNBTParser;
 import org.glavo.nbt.tag.Tag;
 import org.glavo.nbt.tag.TagType;
@@ -37,33 +36,23 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
         return new SNBTParser(path, 0, path.length()).nextPath();
     }
 
-    /// Get the path from the root tag to the given tag.
+    /// Get the path from the root to the given tag.
+    ///
+    /// @return the path or `null` if parent is null.
+    /// @throws IllegalStateException when the expected root doesn't match the actual root.
+    @Contract(pure = true)
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag) throws IllegalArgumentException, IllegalStateException {
+        return NBTPathImpl.of(tag, null);
+    }
+
+    /// Get the path from the root to the given tag.
     ///
     /// @param expectedRoot the expected root instead of the top of the tree.
     /// @return the path or `null` if parent is null.
     /// @throws IllegalStateException when the expected root doesn't match the actual root.
-    @SuppressWarnings({"DataFlowIssue", "unchecked"})
     @Contract(pure = true)
-    static @Nullable <T extends Tag> NBTPath<T> of(T tag, @Nullable Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
-        NBTParent<?> parentTag = tag.getParent();
-        if (parentTag == null) return null;
-
-        List<NBTPathNode> paths = new ArrayList<>();
-        paths.add(NBTPathImpl.getIndicator(tag));
-        while (true) {
-            NBTPathNode parentIndicator = NBTPathImpl.getIndicator(parentTag);
-            if (parentTag == expectedRoot || parentIndicator == null) break;
-            paths.add(parentIndicator);
-            NBTParent<?> parent = parentTag.getParent();
-            if (parent == null) break;
-            parentTag = parent;
-        }
-
-        if (expectedRoot != null && parentTag != expectedRoot)
-            throw new IllegalStateException("Unexpected root tag " + parentTag + ", expected " + expectedRoot + ".");
-        Collections.reverse(paths);
-        NBTPathNode[] nodes = paths.toArray(NBTPathNode[]::new);
-        return (NBTPath<T>) new NBTPathImpl<>(nodes, tag.getType());
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag, Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
+        return NBTPathImpl.of(tag, expectedRoot);
     }
 
     /// Returns the tag type of this path.
