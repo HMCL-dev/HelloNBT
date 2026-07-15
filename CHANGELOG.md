@@ -9,6 +9,10 @@
 
 - The `NBTSchema.Builder#build()` method has been renamed to `end()`.
 
+### Bug Fixes
+
+- Fix #3: `ParentTag#removeAt` throws `ArrayIndexOutOfBoundsException` at specific sizes (#4)
+
 ## 0.3.0 (2026-03-25)
 
 - New API `NBTSchema` for validating NBT elements.
