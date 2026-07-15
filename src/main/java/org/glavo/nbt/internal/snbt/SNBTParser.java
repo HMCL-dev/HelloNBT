@@ -277,7 +277,7 @@ public final class SNBTParser {
                 };
             }
         } else {
-            throw new IllegalArgumentException("Unexpected character: " + new String(Character.toChars(firstChar)));
+            throw new IllegalArgumentException("Unexpected character: " + new String(Character.toChars(firstChar)) + " at " + firstCharCursor);
         }
     }
 
