@@ -15,18 +15,15 @@
  */
 package org.glavo.nbt;
 
+import org.glavo.nbt.chunk.Chunk;
+import org.glavo.nbt.chunk.ChunkRegion;
 import org.glavo.nbt.io.NBTCodec;
 import org.glavo.nbt.tag.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 final class NBTPathTest {
 
@@ -187,5 +184,125 @@ final class NBTPathTest {
         assertThrows(IllegalArgumentException.class, () -> NBTPath.of("numbers[1]."));
         assertThrows(IllegalArgumentException.class, () -> NBTPath.of("\"unterminated"));
         assertThrows(IllegalArgumentException.class, () -> NBTPath.of("[2147483648]"));
+    }
+
+    @Test
+    void testPathString() {
+        assertEquals("{}", NBTPath.of("{}").toPathString());
+        assertEquals("{Invisible:1B}", NBTPath.of("{Invisible:1b}").toPathString());
+        assertEquals("\"A Very Cool Name[]\"", NBTPath.of("\"A Very Cool Name[]\"").toPathString());
+        assertEquals("\"A Very Cool Name[]\"{}", NBTPath.of("\"A Very Cool Name[]\"{}").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[]", NBTPath.of("\"A Very Cool Name[]\"[]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[{}]", NBTPath.of("\"A Very Cool Name[]\"[{}]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[{Count:25B}]", NBTPath.of("\"A Very Cool Name[]\"[{Count:25b}]").toPathString());
+        assertEquals("\"A Very Cool Name[]\"[][][]", NBTPath.of("\"A Very Cool Name[]\"[][][]").toPathString());
+        assertEquals("foo.bar", NBTPath.of("foo.bar").toPathString());
+        assertEquals("foo.bar[]", NBTPath.of("foo.bar.[]").toPathString());
+        assertEquals("foo.bar[{}]", NBTPath.of("foo.bar.[{}]").toPathString());
+        assertEquals("foo.bar[0]", NBTPath.of("foo.bar.[0]").toPathString());
+        assertEquals("foo.bar[-1]", NBTPath.of("foo.bar.[-1]").toPathString());
+        assertEquals("foo.bar.\"0123\"", NBTPath.of("foo.bar.\"0123\"").toPathString());
+    }
+
+    @Test
+    void testPathStringKeepDots() {
+        assertEquals("{}", NBTPath.of("{}").toPathString(false));
+        assertEquals("{Invisible:1B}", NBTPath.of("{Invisible:1b}").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\"", NBTPath.of("\"A Very Cool Name[]\"").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\"{}", NBTPath.of("\"A Very Cool Name[]\"{}").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[]", NBTPath.of("\"A Very Cool Name[]\"[]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[{}]", NBTPath.of("\"A Very Cool Name[]\"[{}]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[{Count:25B}]", NBTPath.of("\"A Very Cool Name[]\"[{Count:25b}]").toPathString(false));
+        assertEquals("\"A Very Cool Name[]\".[].[].[]", NBTPath.of("\"A Very Cool Name[]\"[][][]").toPathString(false));
+        assertEquals("foo.bar", NBTPath.of("foo.bar").toPathString(false));
+        assertEquals("foo.bar.[]", NBTPath.of("foo.bar.[]").toPathString(false));
+        assertEquals("foo.bar.[{}]", NBTPath.of("foo.bar.[{}]").toPathString(false));
+        assertEquals("foo.bar.[0]", NBTPath.of("foo.bar.[0]").toPathString(false));
+        assertEquals("foo.bar.[-1]", NBTPath.of("foo.bar.[-1]").toPathString(false));
+        assertEquals("foo.bar.\"0123\"", NBTPath.of("foo.bar.\"0123\"").toPathString(false));
+    }
+
+    @Test
+    void testOfPath() {
+        CompoundTag root = new CompoundTag().setName("root");
+        IntTag tag;
+
+        root.addTag("foo", new CompoundTag()
+                .addTag("bar", new ListTag<IntTag>()
+                        .addTag(new IntTag(0))
+                        .addTag(new IntTag(1))
+                        .addTag(tag = new IntTag(2))
+                ));
+
+        NBTPath<IntTag> pathTo2 = NBTPath.of(tag, root);
+        assertNotNull(pathTo2);
+        assertEquals(2, root.getFirstInt(pathTo2));
+        assertEquals(NBTPath.of("foo.bar[2]").withTagType(TagType.INT), pathTo2);
+    }
+
+    @Test
+    void testOfPath2() {
+        CompoundTag root = new CompoundTag().setName("root");
+        CompoundTag expectedRoot;
+        IntTag tag;
+
+        root.addTag("foo", expectedRoot = new CompoundTag()
+                .addTag("bar", new CompoundTag()
+                        .addTag("baz", new ListTag<IntTag>()
+                                .addTag(new IntTag(0))
+                                .addTag(new IntTag(1))
+                                .addTag(tag = new IntTag(2))
+                        )));
+
+        NBTPath<IntTag> pathTo2 = NBTPath.of(tag, expectedRoot);
+        assertNotNull(pathTo2);
+        assertEquals(2, expectedRoot.getFirstInt(pathTo2));
+        assertEquals(NBTPath.of("bar.baz[2]").withTagType(TagType.INT), pathTo2);
+    }
+
+    @Test
+    void testOfPath3() {
+        CompoundTag root = new CompoundTag().setName("root");
+        StringTag tag;
+
+        root.addTag("Very Cool Name", new CompoundTag()
+                .addTag("bar", new CompoundTag()
+                        .addTag("baz", tag = new StringTag(":D"))));
+
+        NBTPath<StringTag> pathToSmile = NBTPath.of(tag, root);
+        NBTPath<StringTag> pathToRoot = NBTPath.of(tag);
+        assertNotNull(pathToSmile);
+        assertEquals(":D", root.getFirstString(pathToSmile));
+        assertEquals(pathToSmile, pathToRoot);
+        assertEquals(NBTPath.of("\"Very Cool Name\".bar.baz").withTagType(TagType.STRING), pathToSmile);
+    }
+
+    @Test
+    void testOfPath4() {
+        ChunkRegion chunkRegion = new ChunkRegion();
+        Chunk chunk = chunkRegion.getChunk(0, 0);
+        CompoundTag rootTag;
+        chunk.setRootTag(rootTag = new CompoundTag());
+        StringTag testTag;
+        rootTag.addTag("test", testTag = new StringTag("TEST"));
+
+        NBTPath<StringTag> pathToTest = NBTPath.of(testTag);
+        assertNotNull(pathToTest);
+        assertEquals("test", pathToTest.toPathString());
+        assertEquals("TEST", chunkRegion.getFirstString(pathToTest));
+        assertEquals("TEST", chunk.getFirstString(pathToTest));
+    }
+
+    @Test
+    void testOfPath5() {
+        CompoundTag rootTag;
+        Chunk chunk = new Chunk(rootTag = new CompoundTag());
+        StringTag testTag;
+        rootTag.addTag("test", testTag = new StringTag("TEST"));
+
+        NBTPath<StringTag> path = NBTPath.of(testTag);
+        assertNotNull(path);
+        assertEquals("TEST", chunk.getFirstString(path));
+        assertEquals("test", path.toPathString());
     }
 }

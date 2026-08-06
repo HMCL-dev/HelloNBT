@@ -22,6 +22,8 @@ import org.glavo.nbt.tag.TagType;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+
 /// An NBT path is a descriptive string used to specify one or more particular elements from an NBT data tree.
 ///
 /// @see <a href="https://minecraft.wiki/w/NBT_path">NBT Path - Minecraft Wiki</a>
@@ -32,6 +34,25 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     @Contract(pure = true)
     static NBTPath<?> of(String path) throws IllegalArgumentException {
         return new SNBTParser(path, 0, path.length()).nextPath();
+    }
+
+    /// Get the path from the root to the given tag.
+    ///
+    /// @return the path or `null` if parent is null.
+    /// @throws IllegalStateException when the expected root doesn't match the actual root.
+    @Contract(pure = true)
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag) throws IllegalArgumentException, IllegalStateException {
+        return NBTPathImpl.of(tag, null);
+    }
+
+    /// Get the path from the root to the given tag.
+    ///
+    /// @param expectedRoot the expected root instead of the top of the tree.
+    /// @return the path or `null` if parent is null.
+    /// @throws IllegalStateException when the expected root doesn't match the actual root.
+    @Contract(pure = true)
+    static @Nullable <T extends Tag> NBTPath<T> of(T tag, Tag expectedRoot) throws IllegalArgumentException, IllegalStateException {
+        return NBTPathImpl.of(tag, expectedRoot);
     }
 
     /// Returns the tag type of this path.
@@ -49,5 +70,17 @@ public sealed interface NBTPath<T extends Tag> permits NBTPathImpl {
     /// @throws IllegalStateException if the path does not match the given tag type.
     @Contract(pure = true)
     <T2 extends Tag> NBTPath<T2> withTagType(TagType<T2> tagType) throws IllegalStateException;
+
+    /// Returns the path string.
+    ///
+    /// @param omitDots `true` to omit dots if possible.
+    @Contract(pure = true)
+    String toPathString(boolean omitDots);
+
+    /// Returns the path string with dots omitted if possible.
+    @Contract(pure = true)
+    default String toPathString() {
+        return toPathString(true);
+    }
 
 }
